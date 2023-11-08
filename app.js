@@ -917,29 +917,48 @@ app.post("/saveScore", async (req, res) => {
   }
 });
 
-// Adding artifact route
-app.post(
-  "/loggedIn/admin/addArtifact",
+const cloudinary = require('cloudinary').v2; // Import the Cloudinary Node.js SDK
+
+// Configure Cloudinary with your details from the CLOUDINARY_URL environment variable
+cloudinary.config({
+  cloud_name: 'dcfqxfx7w',
+  api_key: '982629929572833',
+  api_secret: 'Gr6GeILkp82Fpf4j2m_jq1nOHvM',
+  secure: true // Use secure (https) URLs
+});
+
+app.post("/loggedIn/admin/addArtifact",
   upload.single("image"),
   async (req, res) => {
     const { title, description, type } = req.body;
-    const image = req.file.filename; // Get the uploaded image file name
+    const image = req.file.path; // Get the path of the uploaded image file
 
     try {
+      // Upload the image to Cloudinary
+      const cloudinaryUploadResult = await cloudinary.uploader.upload(image);
+
+      // Construct the Cloudinary URL using your base URL
+      const cloudinaryBaseUrl = 'https://res.cloudinary.com/dcfqxfx7w'; // Use the secure delivery URL
+      const publicId = cloudinaryUploadResult.public_id;
+      const cloudinaryImageUrl = cloudinaryBaseUrl + '/' + publicId; // Include a '/' before the public ID
+
+      // Create a new artifact with the constructed Cloudinary URL
       const artifact = new Artifact({
         title,
         type,
         description,
-        image,
+        image: cloudinaryImageUrl, // Use the Cloudinary URL
       });
+
       await artifact.save();
       res.redirect("/loggedInadmin"); // Redirect to the admin page after adding the artifact
     } catch (err) {
-      console.error(err);
-      res.status(500).send("Error adding artifact");
+      console.error("Error uploading image to Cloudinary:", err);
+      res.status(500).send("Error uploading image to Cloudinary");
     }
   }
 );
+
 
 // Update an artifact
 app.put(
@@ -959,22 +978,20 @@ app.put(
 
       // Check if a new image was uploaded
       if (req.file) {
-        // Delete the old image if it exists
+        // Delete the old image if it exists on Cloudinary
         if (artifact.image) {
-          const oldImagePath = path.join(
-            __dirname,
-            "public",
-            "uploads",
-            artifact.image
-          );
-          fs.unlinkSync(oldImagePath); // Delete the file
+          const publicId = artifact.image.substring(artifact.image.lastIndexOf("/") + 1, artifact.image.lastIndexOf("."));
+          await cloudinary.uploader.destroy(publicId);
         }
 
-        // Update the image with the new file's filename
-        artifact.image = req.file.filename;
+        // Upload the new image to Cloudinary
+        const cloudinaryUploadResult = await cloudinary.uploader.upload(req.file.path);
+
+        // Update the artifact's image with the Cloudinary URL
+        artifact.image = cloudinaryUploadResult.secure_url;
       }
 
-      // Update the title and description
+      // Update the title, description, and type
       artifact.title = updateTitle;
       artifact.description = updateDescription;
       artifact.type = updateType;
@@ -988,6 +1005,7 @@ app.put(
     }
   }
 );
+
 
 // Remove an artifact
 app.delete("/loggedIn/admin/artifacts/:artifactId", async (req, res) => {
