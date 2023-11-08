@@ -171,7 +171,7 @@ const fileFilter = (req, file, cb) => {
 };
 
 // Set up the multer middleware with the storage and file filter
-const upload = multer({ storage: storage, fileFilter: fileFilter });
+const upload = multer({ fileFilter: fileFilter });
 
 //NOT LOGGED IN
 
@@ -945,6 +945,8 @@ app.post("/loggedIn/admin/addArtifact",
     }
   }
 );
+
+
 
 
 // Update an artifact
