@@ -352,8 +352,7 @@
                     <form action="/loggedIn/admin/artifacts/<%= artifact._id %>?_method=DELETE" method="POST">
                       <button type="submit" class="btn btn-danger">Remove Artifact</button>
                     </form>
-                    <form action="/loggedIn/admin/artifacts/<%= artifact._id %>?_method=PUT" method="post" class="mt-2"
-                      enctype="multipart/form-data">
+                    <form action="/loggedIn/admin/artifacts/<%= artifact._id %>?_method=PUT" method="post" class="mt-2">
                       <div class="mb-3">
                         <label for="updateTitle" class="form-label">Update Title</label>
                         <input type="text" name="updateTitle" value="<%= artifact.title %>" class="form-control"
