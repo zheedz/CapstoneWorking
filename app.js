@@ -152,19 +152,6 @@ app.get("/reset-inactivity", (req, res) => {
   res.sendStatus(200); // Send a success response
 });
 
-// Configure storage for artifact images
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "public/uploads");
-  },
-  filename: (req, file, cb) => {
-    const randomDigits = Math.random().toString().slice(2, 5); // Three random digits
-    const fileExtension = file.originalname.split(".").pop();
-    const originalFilename = file.originalname.split(".").shift(); // Extract the original filename without extension
-    const newFilename = `${originalFilename}-${randomDigits}.${fileExtension}`;
-    cb(null, newFilename);
-  },
-});
 
 // Define the file filter function
 const fileFilter = (req, file, cb) => {
