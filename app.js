@@ -1010,7 +1010,7 @@ app.delete("/loggedIn/admin/artifacts/:artifactId", async (req, res) => {
     await Artifact.findByIdAndRemove(artifactId);
 
     // Remove the associated image file
-    const imagePath = path.join(__dirname, "public/uploads", artifact.image);
+
 
     if (fs.existsSync(imagePath)) {
       fs.unlinkSync(imagePath);
