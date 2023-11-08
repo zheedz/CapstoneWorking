@@ -1009,11 +1009,10 @@ app.delete("/loggedIn/admin/artifacts/:artifactId", async (req, res) => {
     // Remove the artifact from the database
     await Artifact.findByIdAndRemove(artifactId);
 
-    // Remove the associated image file
-
-
-    if (fs.existsSync(imagePath)) {
-      fs.unlinkSync(imagePath);
+    // Remove the associated image from Cloudinary
+    if (artifact.image) {
+      const publicId = artifact.image.substring(artifact.image.lastIndexOf("/") + 1, artifact.image.lastIndexOf("."));
+      await cloudinary.uploader.destroy(publicId);
     }
 
     res.redirect("/loggedInadmin"); // Redirect to the admin page after removing
